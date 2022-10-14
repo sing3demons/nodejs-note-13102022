@@ -3,12 +3,12 @@ const { Router } = require('express')
 const router = Router()
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
-const { isLogin } = require('../middleware/passportJWT.js')
+const { isLogin, imAdmin } = require('../middleware/passportJWT.js')
 const User = require('../models/User.js')
 
-router.get('/', async (req, res) => {
+router.get('/', [isLogin, imAdmin], async (req, res) => {
   try {
-    const result = await User.find()
+    const result = await User.find({})
 
     res.status(200).json({
       resultCode: 20000,
