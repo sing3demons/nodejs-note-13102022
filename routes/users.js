@@ -1,32 +1,12 @@
 const { Router } = require('express')
 const User = require('../models/User.js')
 const jwt = require('jsonwebtoken')
+const passportJWT = require('../middleware/passportJWT.js')
+
 const router = Router()
 
-//localhost:3000/api/users
-router.get('/', async (req, res) => {
-  const users = await User.find({})
-
-  let result = []
-  for (let user of users) {
-    result.push({
-      id: user._id,
-      email: user.email,
-      first_name: user.fistName,
-      last: user.lastName,
-      role: user.role,
-    })
-  }
-
-  //   const result = users.map((user) => {
-  //     return {
-  //       id: user._id,
-  //       email: user.email,
-  //       first_name: user.fistName,
-  //       last: user.lastName,
-  //       role: user.role,
-  //     }
-  //   })
+router.get('/me', [passportJWT.isLogin], async (req, res) => {
+  const result = req.user
 
   res.status(200).json({
     resultCode: 20000,
@@ -34,6 +14,42 @@ router.get('/', async (req, res) => {
     resultData: result,
   })
 })
+
+//localhost:3000/api/users
+router.get(
+  '/',
+  [passportJWT.isLogin, passportJWT.checkAdmin],
+  async (req, res) => {
+    const users = await User.find({})
+
+    //   let result = []
+    //   for (let user of users) {
+    //     result.push({
+    //       id: user._id,
+    //       email: user.email,
+    //       first_name: user.fistName,
+    //       last: user.lastName,
+    //       role: user.role,
+    //     })
+    //   }
+
+    const result = users.map((user) => {
+      return {
+        id: user._id,
+        email: user.email,
+        first_name: user.fistName,
+        last: user.lastName,
+        role: user.role,
+      }
+    })
+
+    res.status(200).json({
+      resultCode: 20000,
+      resultDescription: 'find all users',
+      resultData: result,
+    })
+  }
+)
 
 //localhost:3000/api/users/register
 router.post('/register', async (req, res) => {
@@ -86,7 +102,7 @@ router.post('/login', async (req, res) => {
     {
       sub: user._id,
     },
-    '16163FE4-24BB-4E3B-A65F-1CD22DBC6A5B',
+    process.env.JWT_SECRET,
     {
       expiresIn: '1h',
     }
