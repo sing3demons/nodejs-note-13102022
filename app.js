@@ -1,6 +1,7 @@
 const express = require('express')
 const morgan = require('morgan')
 const mongoose = require('mongoose')
+const passport = require('passport')
 
 const app = express()
 const port = 3000
@@ -15,15 +16,16 @@ mongoose
   .then(() => console.log('MongoDB connection is successful'))
   .catch((err) => {
     console.log(`error connecting to the database: ${err}`)
-    process.exit()
   })
 
+app.use(passport.initialize())
 app.use(express.json({}))
 app.use(express.urlencoded({ extended: false }))
 app.use(morgan('dev'))
 
 app.get('/', (req, res) => res.status(200).send('Hello World!'))
 
-app.use('/note', require('./routes/note.js'))
+app.use('/api/note', require('./routes/note.js'))
+app.use('/api/users', require('./routes/user.js'))
 
 app.listen(port, () => console.log(`listening on port ${port}!`))
