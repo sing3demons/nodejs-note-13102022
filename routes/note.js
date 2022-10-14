@@ -1,40 +1,16 @@
 const { Router } = require('express')
-const { model, Schema } = require('mongoose')
 const router = Router()
+const noteController = require('../controllers/noteController.js')
 
-const noteSchema = Schema(
-  {
-    title: String,
-    text: String,
-    date: Date,
-  },
-  {
-    collection: 'note',
-    versionKey: false,
-  }
-)
-const Note = new model('note', noteSchema)
+// http://localhost:3000/api/note
+router.get('/', noteController.findAll)
 
-router.get('/', async (req, res) => {
-  const result = await Note.find({})
-  res.status(200).json({
-    resultCode: 20000,
-    resultData: result,
-  })
-})
+router.get('/:id', noteController.findOne)
 
-router.post('/', async (req, res) => {
-  const { title, text } = req.body
-  const result = await Note.create({
-    title,
-    text,
-    date: Date.now(),
-  })
+router.post('/', noteController.create)
 
-  res.status(201).json({
-    resultCode: 20100,
-    resultData: result,
-  })
-})
+router.put('/:id', noteController.update)
+
+router.delete('/:id', noteController.delete)
 
 module.exports = router
